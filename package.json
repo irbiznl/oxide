@@ -1,0 +1,32 @@
+{
+  "name": "oxide",
+  "version": "1.0.0",
+  "description": "Oxide is a javascript library to get connection information and allows the browser to load certain content only if a minimum speed requirements are met.",
+  "main": "oxide.js",
+  "dependencies": {
+    "webrtc-adapter": "^3.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irbiznl/oxide.git"
+  },
+  "keywords": [
+    "responsive",
+    "reactive",
+    "javascript",
+    "webrtc",
+    "STUN",
+    "ip",
+    "ipaddress"
+  ],
+  "author": "Francois de Quillettes (irbiz software development)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/irbiznl/oxide/issues"
+  },
+  "homepage": "https://github.com/irbiznl/oxide#readme"
+}
