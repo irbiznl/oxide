@@ -1,4 +1,7 @@
-var obm = new OxideBenchmarker();
+document.addEventListener("onOxideSpeedChange", function(e) { console.log(e); });
+document.addEventListener("onOxideIpAddress", function(e) { console.log(e); });
+
+var obm = new Oxide();
 var file1 = 'https://upload.wikimedia.org/wikipedia/commons/6/6c/0-cynefin-ORIGINEEL.jpg';
 var file2 = 'https://upload.wikimedia.org/wikipedia/commons/1/18/F-35_EOTS.jpeg';
 
@@ -17,4 +20,4 @@ obm.load(file2+'?'+(new Date()).getTime());
 obm.load(file1+'?'+(new Date()).getTime());
 obm.load(file2+'?'+(new Date()).getTime());
 
-console.log( obm.getSpeed() );
+console.log( obm.benchmarker.getSpeed() );

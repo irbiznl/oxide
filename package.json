@@ -4,10 +4,16 @@
   "description": "Oxide is a javascript library to get connection information and allows the browser to load certain content only if a minimum speed requirements are met.",
   "main": "oxide.js",
   "dependencies": {
+    "concat": "^3.0.0",
+    "uglify-js": "^2.8.20",
     "webrtc-adapter": "^3.2.0"
   },
   "devDependencies": {},
   "scripts": {
+    "clean": "rm -r release/*",
+    "build:development": "node_modules/concat/bin/concat -o release/oxide.dev.js node_modules/webrtc-adapter/out/adapter.js src/*.js",
+    "build:minified": "node_modules/uglify-js/bin/uglifyjs release/oxide.dev.js -o release/oxide.min.js -c -m",
+    "build": "npm run build:development && npm run build:minified",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

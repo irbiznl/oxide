@@ -4,7 +4,7 @@
  * so the benchmarker can double as a preloader.
  * @constructor
  */
-function OxideBenchmarker() {
+function OxideBenchmarker( previousBenchmarkResults, previousBenchmarkQueue ) {
     'use strict';
 
     this.BENCHMARK_STATE_IDLE = 'idle';
@@ -16,6 +16,9 @@ function OxideBenchmarker() {
      * @type {Array}
      */
     this.benchmarkResults = {};
+    if( typeof previousBenchmarkResults === 'object' ) {
+        this.benchmarkResults = previousBenchmarkResults;
+    }
 
     /**
      * Holds the queue of resources to load. Resources are not loaded concurrently
@@ -23,6 +26,9 @@ function OxideBenchmarker() {
      * @type {Array}
      */
     this.benchmarkQueue = [];
+    if( typeof previousBenchmarkQueue === 'object' ) {
+        this.benchmarkQueue = previousBenchmarkQueue;
+    }
 
     /**
      * Read and updated by the benchmark queue handler to prevent concurrent resource loads.
@@ -50,9 +56,9 @@ OxideBenchmarker.prototype.work = function() {
     var self = this;
     //console.log( 'benchmark state: ' + this.benchmarkState );
     //console.log( 'benchmark queue size: ' + this.benchmarkQueue.length );
-    if( this.benchmarkState == this.BENCHMARK_STATE_IDLE || this.benchmarkState == this.BENCHMARK_STATE_QUEUE ) {
+    if( this.benchmarkState === this.BENCHMARK_STATE_IDLE || this.benchmarkState === this.BENCHMARK_STATE_QUEUE ) {
         var currentItem = this.benchmarkQueue.shift();
-        if( typeof currentItem == 'string' ) {
+        if( typeof currentItem === 'string' ) {
             //console.log('benchmark going to process: ' + currentItem);
             this.benchmark(currentItem);
         }
@@ -85,11 +91,19 @@ OxideBenchmarker.prototype.benchmark = function(resource) {
         if(xhr.readyState === XMLHttpRequest.DONE ) {
             self.benchmarkState = ( self.benchmarkQueue.length > 0 ? self.BENCHMARK_STATE_QUEUE : self.BENCHMARK_STATE_IDLE);
             if( xhr.status === 200 ) {
-                if( typeof self.benchmarkResults[xhr.responseURL] == 'undefined' ) {
+                if( typeof self.benchmarkResults[xhr.responseURL] === 'undefined' ) {
                     self.benchmarkResults[xhr.responseURL] = { size: xhr.response.length, loadTimes: [] };
                 }
                 var benchmarkTime = (new Date()).getTime() - benchmarkStart;
                 self.benchmarkResults[xhr.responseURL].loadTimes.push(benchmarkTime);
+
+                var event = new CustomEvent("onOxideSpeedChange", {
+                    detail: {
+                        speed: self.getSpeed(),
+                        queueSize: self.benchmarkQueue.length
+                    }
+                });
+                document.dispatchEvent(event);
             }
         }
     };
@@ -97,6 +111,11 @@ OxideBenchmarker.prototype.benchmark = function(resource) {
 
 };
 
+/**
+ * Calculates the average speed over all completed benchmarks in the result table.
+ * Returned value is in kilobytes (SI definition) per second.
+ * @returns {number}
+ */
 OxideBenchmarker.prototype.getSpeed = function() {
     var totalSize = 0.0;
     var totalTime = 0.0;
@@ -110,5 +129,8 @@ OxideBenchmarker.prototype.getSpeed = function() {
         }
     }
 
-    return (totalSize/(totalTime/1000))/1024;
+    /**
+     * Converting from bytes to kilobytes and milliseconds to seconds cancel eachother out.
+     */
+    return (totalSize/totalTime);
 };
