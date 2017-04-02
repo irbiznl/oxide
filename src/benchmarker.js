@@ -99,11 +99,18 @@ OxideBenchmarker.prototype.benchmark = function(resource) {
 
                 var event = new CustomEvent("onOxideSpeedChange", {
                     detail: {
+                        // Include speed over all stored benchmarks and the number of files left to benchmark.
                         speed: self.getSpeed(),
-                        queueSize: self.benchmarkQueue.length
+                        queueSize: self.benchmarkQueue.length,
+                        // And include most recent file and its loadtime
+                        lastUrl: xhr.responseURL,
+                        lastFileLoadTime: benchmarkTime,
+                        lastFileSpeed: self.benchmarkResults[xhr.responseURL].size/benchmarkTime,
                     }
                 });
                 document.dispatchEvent(event);
+
+                // TODO build outlier detection: if all new results are outliers -> invalidate older results?
             }
         }
     };

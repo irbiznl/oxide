@@ -3046,7 +3046,7 @@ function OxideBenchmarker( previousBenchmarkResults, previousBenchmarkQueue ) {
      * @type {Array}
      */
     this.benchmarkResults = {};
-    if( typeof previousBenchmarkResults == 'object' ) {
+    if( typeof previousBenchmarkResults === 'object' ) {
         this.benchmarkResults = previousBenchmarkResults;
     }
 
@@ -3056,7 +3056,7 @@ function OxideBenchmarker( previousBenchmarkResults, previousBenchmarkQueue ) {
      * @type {Array}
      */
     this.benchmarkQueue = [];
-    if( typeof previousBenchmarkQueue == 'object' ) {
+    if( typeof previousBenchmarkQueue === 'object' ) {
         this.benchmarkQueue = previousBenchmarkQueue;
     }
 
@@ -3086,9 +3086,9 @@ OxideBenchmarker.prototype.work = function() {
     var self = this;
     //console.log( 'benchmark state: ' + this.benchmarkState );
     //console.log( 'benchmark queue size: ' + this.benchmarkQueue.length );
-    if( this.benchmarkState == this.BENCHMARK_STATE_IDLE || this.benchmarkState == this.BENCHMARK_STATE_QUEUE ) {
+    if( this.benchmarkState === this.BENCHMARK_STATE_IDLE || this.benchmarkState === this.BENCHMARK_STATE_QUEUE ) {
         var currentItem = this.benchmarkQueue.shift();
-        if( typeof currentItem == 'string' ) {
+        if( typeof currentItem === 'string' ) {
             //console.log('benchmark going to process: ' + currentItem);
             this.benchmark(currentItem);
         }
@@ -3121,7 +3121,7 @@ OxideBenchmarker.prototype.benchmark = function(resource) {
         if(xhr.readyState === XMLHttpRequest.DONE ) {
             self.benchmarkState = ( self.benchmarkQueue.length > 0 ? self.BENCHMARK_STATE_QUEUE : self.BENCHMARK_STATE_IDLE);
             if( xhr.status === 200 ) {
-                if( typeof self.benchmarkResults[xhr.responseURL] == 'undefined' ) {
+                if( typeof self.benchmarkResults[xhr.responseURL] === 'undefined' ) {
                     self.benchmarkResults[xhr.responseURL] = { size: xhr.response.length, loadTimes: [] };
                 }
                 var benchmarkTime = (new Date()).getTime() - benchmarkStart;
@@ -3129,11 +3129,19 @@ OxideBenchmarker.prototype.benchmark = function(resource) {
 
                 var event = new CustomEvent("onOxideSpeedChange", {
                     detail: {
+                        // Include speed over all stored benchmarks and the number of files left to benchmark.
                         speed: self.getSpeed(),
-                        queueSize: self.benchmarkQueue.length
+                        queueSize: self.benchmarkQueue.length,
+                        // And include most recent file and its loadtime
+                        lastUrl: xhr.responseURL,
+                        lastFileLoadTime: benchmarkTime,
+                        lastFileSpeed: self.benchmarkResults[xhr.responseURL].size/benchmarkTime,
                     }
                 });
                 document.dispatchEvent(event);
+
+                // TODO build outlier detection:
+                // - if all new results are outliers -> invalidate older results?
             }
         }
     };
@@ -3170,7 +3178,7 @@ function OxideIpMonitor( ipAddresses ) {
     this.peerConnection = new RTCPeerConnection(null);
 
     this.ipAddresses = {};
-    if( typeof ipAddresses == 'object' ) {
+    if( typeof ipAddresses === 'object' ) {
         this.ipAddresses = ipAddresses;
     }
 };
@@ -3210,7 +3218,7 @@ OxideIpMonitor.prototype.init = function() {
 
     }, function(){});
 
-    // TODO ROADMAP 1.1 also set up an actual connection to a STUN server instead of just a local one
+    // TODO ROADMAP 1.1 also set up an actual connection to a STUN server instead of just a local one, this might make it possible to check for dropped connection
 };
 function Oxide() {
     'use strict';
@@ -3221,12 +3229,12 @@ function Oxide() {
     this.ipMonitor = new OxideIpMonitor( JSON.parse( localStorage.getItem( 'nlIrbizOxideIpAddresses' ) ) );
     this.ipMonitor.init();
 
-    document.addEventListener("onOxideSpeedChange", function(e) {
+    document.addEventListener("onOxideSpeedChange", function() {
         localStorage.setItem( 'nlIrbizOxideBenchmarkResults', JSON.stringify( self.benchmarker.benchmarkResults ) );
         localStorage.setItem( 'nlIrbizOxideBenchmarkQueue', JSON.stringify( self.benchmarker.benchmarkQueue ) );
     });
 
-    document.addEventListener("onOxideIpAddress", function(e) {
+    document.addEventListener("onOxideIpAddress", function() {
         localStorage.setItem( 'nlIrbizOxideIpAddresses', JSON.stringify( self.ipMonitor.ipAddresses ) );
     });
 };

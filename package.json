@@ -1,8 +1,7 @@
 {
-  "name": "oxide",
+  "name": "8o",
   "version": "1.0.0",
-  "description": "Oxide is a javascript library to get connection information and allows the browser to load certain content only if a minimum speed requirements are met.",
-  "main": "oxide.js",
+  "description": "Oxide (8O) is a javascript library to get connection information and allows the browser to load certain content only if a minimum speed requirements are met.",
   "dependencies": {
     "concat": "^3.0.0",
     "uglify-js": "^2.8.20",
